@@ -1,3 +1,3 @@
-select distinct l1.num as ConsecutiveNums from logs l1, logs l2, logs l3
-where l1.id = l2.id - 1 and l2.id = l3.id - 1
-and l1.num = l2.num and l2.num = l3.num;
+select distinct num as ConsecutiveNums from 
+(select num, LEAD(num) over(order by id) as next_num, LAG(num) over(order by id) as prev_num from logs) as li
+where num = next_num and num = prev_num;
