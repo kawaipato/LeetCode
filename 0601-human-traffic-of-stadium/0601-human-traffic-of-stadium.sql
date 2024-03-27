@@ -1,8 +1,12 @@
-select distinct A.*
-from stadium as a, stadium as b, stadium as c
-where a.people >= 100 and b.people >= 100 and c.people >= 100
-and (
-        (b.id - a.id = 1 and c.id - b.id = 1)
-    or  (a.id - b.id = 1 and b.id - c.id = 1)
-    or  (b.id - a.id = 1 and a.id - c.id = 1))
+with stadium_with_rnk as(
+    (select id, visit_date, people, rnk, (id - rnk) as island
+    from (select id, visit_date, people, rank() over(order by id) as rnk
+    from stadium
+    where people >= 100) as T))
+    
+select id, visit_date, people from stadium_with_rnk
+where island in (select island
+                from stadium_with_rnk
+                group by island
+                having count(*) >= 3)
 order by id
